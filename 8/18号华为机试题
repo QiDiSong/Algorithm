@@ -1,0 +1,174 @@
+华为2021/8/18 算法三道题
+8.18号华为笔试题
+#include<iostream>
+#include<vector>
+#include<algorithm>
+
+using namespace std;
+
+int main() {
+    int value = 0, num = 0,we=0,va=0,nu=0;
+    cin >> value >> num;
+    vector<int>weight(num, 0);
+    vector<int>v(num, 0);
+    vector<int>n(num, 0);
+    for (int i = 0; i < num; i++) {
+        cin >> we >> nu >> va;
+        weight[i] = we;
+        n[i] = nu;
+        v[i] = va;
+    }
+    for (int i = 0; i < n.size(); i++) {
+        while (n[i] > 1) {
+            weight.emplace_back(weight[i]);
+            v.emplace_back(v[i]);
+            n[i]--;
+        }
+    }
+    vector<int> dp(value + 1, 0);
+    for (int i = 0; i < weight.size(); i++) { // 遍历物品
+        for (int j = value; j >= weight[i]; j--) { // 遍历背包容量
+            dp[j] = max(dp[j], dp[j - weight[i]] + v[i]);
+        }
+    }
+    cout << dp[value] << endl;
+    return 0;
+}
+
+
+# 第二题，选择某些商品，使得价格正好为money（商品不可重复选择，价格相同的算不同商品）
+total, num = [int(x) for x in input().strip().split()]
+prices = [int(x) for x in input().strip().split()]
+
+def foo(total, prices):
+    dp = [0] * (total + 1)
+    dp[0] = 1		# 初始化，商品价值总和为0的组合数初始化为1
+    for price in prices:
+        for i in range(total, price-1, -1):	# 对于手里的钱总数 >= price的时候，都可以购买此商品，花费price元
+            if dp[i - price] != 0:			# 只有当dp[i-price]不为0的时候，此时表示商品价值总和为i-price的组合存在，那么此时可以花费price价格购买商品，从而使得商品价值总和为i的组合也存在
+                dp[i] += dp[i - price]		# 商品价值总和为i的组合数为 原组合数 + 商品价值总和为i-price的总和数
+    return dp[total]
+
+print(foo(total, prices))
+
+// 方法2： nums为商品价格，s为自己拥有的钱数
+vector<vector<int>> dp(nums.size()+1, vector<int> (s+1));
+dp[0][0] = 1;
+for (int i = 1; i <= nums.size(); i++)
+{
+	for (int j = 0; j <= s; j++)
+	{
+		dp[i][j] = dp[i-1][j];
+		if (j >= nums[i-1])
+			dp[i][j] += dp[i-1][j-nums[i-1]];
+	}
+}
+return dp[nums.size()][s];
+
+
+
+// 第三题，连连看，bfs
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<queue>
+
+using namespace std;
+int idx = 1;
+
+void bfs(vector<vector<int>>& data, queue<pair<int, int>>& q, vector<vector<int>>& visit) {
+    while (!q.empty()) {
+        int s = q.size();
+        //cout << q.size() << endl;
+        for (int i = 0; i < s; i++) {
+            //cout << "k" << endl;
+            pair<int, int>a = q.front();
+            q.pop();
+            int b = a.first, c = a.second;
+            int d = a.first, e = a.second;
+            int flag = 0;
+            while ((b-1) >= 0) {
+                if (data[b-1][a.second] == 0 && visit[b - 1][a.second] == 0) {
+                    if (visit[b-1][a.second] == 0) {
+                        visit[b-1][a.second] = idx;
+                        q.push(make_pair(b-1, a.second));
+                        b--;
+                        flag = 1;
+                        //cout << "q" << endl;
+
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+            while ((c-1) >= 0) {
+                if (data[a.first][c-1] == 0 && visit[a.first][c - 1] == 0) {
+                    if (visit[a.first][c-1] == 0) {
+                        visit[a.first][c-1] = idx;
+                        q.push(make_pair(a.first, c-1));
+                        c--;
+                        //cout << "w" << endl;
+                        flag = 1;
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+            while ((d+1) < data.size()) {
+                if (data[d+1][a.second] == 0 && visit[d + 1][a.second] == 0) {
+                    if (visit[d+1][a.second] == 0) {
+                        visit[d+1][a.second] = idx;
+                        q.push(make_pair(d+1, a.second));
+                        d++;
+                        //cout << "e" << endl;
+                        flag = 1;
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+            while ((e+1) < data[0].size()) {
+                if (data[a.first][e+1] == 0 && visit[a.first][e + 1] == 0) {
+                    if (visit[a.first][e+1] == 0) {
+                        visit[a.first][e+1] = idx;
+                        q.push(make_pair(a.first, e+1));
+                        e++;
+                        //cout << "r" << endl;
+                        flag = 1;
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+
+        }
+        idx++;
+
+    }
+    return;
+}
+
+int main() {
+    int r = 0, c = 0,d = 0;
+    cin >> r >> c;
+    vector<vector<int>>data(r,vector<int>(c, 0));
+    vector<vector<int>>visit(r, vector<int>(c, 0));
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            cin >> d;
+            data[i][j] = d;
+        }
+    }
+    int start_x = 0, start_y = 0, end_x = 0, end_y = 0;
+    cin >> start_x >> start_y >> end_x >> end_y;
+    queue<pair<int, int>>q;
+    data[end_x][end_y] = 0;
+    q.push(make_pair(start_x, start_y));
+    bfs(data, q, visit);
+    cout << visit[end_x][end_y];
+    return 0;
+}
