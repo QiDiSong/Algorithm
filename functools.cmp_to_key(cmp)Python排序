@@ -1,0 +1,14 @@
+python cmp
+class Solution:
+    def largestNumber(self, nums: List[int]) -> str:
+        def cmp(a, b):
+            if a+b > b+a:
+                return -1
+            else:
+                return 1
+        nums_str = [str(i) for i in nums]
+        nums_sorted = sorted(nums_str, key=functools.cmp_to_key(cmp))
+        ans = ""
+        for i in nums_sorted:
+            ans += str(i)
+        return '0' if int(ans) == 0 else ans
